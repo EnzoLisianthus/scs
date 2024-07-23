@@ -1,0 +1,1 @@
+game:GetService("ReplicatedStorage").SkipEvent:FireServer("buy")

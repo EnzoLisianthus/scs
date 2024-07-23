@@ -1,0 +1,3 @@
+game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
+game.Players.LocalPlayer.CameraMaxZoomDistance = 128
+game.Players.LocalPlayer.CameraMinZoomDistance = 0.5
