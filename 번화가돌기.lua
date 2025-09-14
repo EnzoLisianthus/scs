@@ -1,0 +1,1 @@
+game.ReplicatedStorage.WEWEW1:FireServer("플러스", math.random(1, 244100))

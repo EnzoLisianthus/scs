@@ -1,0 +1,13 @@
+local current = script
+local pathList = {}
+
+while current do
+    table.insert(pathList, 1, current.Name)  -- 맨 앞에 넣기 (역순)
+    if current == game then
+        break
+    end
+    current = current.Parent
+end
+
+local fullPath = table.concat(pathList, ".")
+print("스크립트 전체 경로:", fullPath)

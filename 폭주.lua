@@ -1,0 +1,1 @@
+game.ReplicatedStorage.PPEAZX:FireServer(100000)

@@ -1,0 +1,50 @@
+local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnzoLisianthus/sss/refs/heads/main/ui%20asset.txt"))() -- 로컬 테스트 시 직접 require()로 대체
+
+local win = UI:CreateWindow("🧪 테스트 UI")
+
+-- 📁 첫 번째 탭: 유틸리티
+local utilTab = win:CreateTab("🔧 유틸리티")
+utilTab:AddButton("플레이어 이름 출력", function()
+    print("플레이어:", game.Players.LocalPlayer.Name)
+end)
+utilTab:AddButton("서버 아이디 출력", function()
+    print("JobId:", game.JobId)
+end)
+utilTab:AddButton("게임 ID 출력", function()
+    print("PlaceId:", game.PlaceId)
+end)
+
+-- 📁 두 번째 탭: 디버그
+local debugTab = win:CreateTab("🐞 디버그")
+debugTab:AddButton("워크스페이스 모든 객체", function()
+    for _, obj in ipairs(workspace:GetChildren()) do
+        print(obj.Name)
+    end
+end)
+debugTab:AddButton("현재 FPS 측정", function()
+    print("FPS 측정 중...") -- 실제 FPS 측정은 BindToRenderStep 등 필요
+end)
+
+-- 📁 세 번째 탭: 테스트
+local testTab = win:CreateTab("🧪 테스트")
+testTab:AddButton("랜덤 숫자 출력", function()
+    print("랜덤:", math.random(1, 100))
+end)
+testTab:AddButton("시간 출력", function()
+    print("Time:", os.date("%X"))
+end)
+testTab:AddButton("UI 종료", function()
+    win = nil
+    print("UI 닫힘 (예시 동작)")
+end)
+
+-- 📁 네 번째 탭: 기타
+local miscTab = win:CreateTab("📦 기타")
+miscTab:AddButton("게임 링크 복사", function()
+    setclipboard("https://roblox.com/games/"..game.PlaceId)
+    print("게임 링크 복사됨")
+end)
+miscTab:AddButton("창 크기 확인", function()
+    local size = workspace.CurrentCamera.ViewportSize
+    print("화면 크기:", size.X, size.Y)
+end)
