@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="28">
+  <CheatEntries/>
+  <UserdefinedSymbols/>
+  <LuaScript>
+dbk_initialize() 
+dbk_useKernelmodeOpenProcess() 
+dbk_useKernelmodeProcessMemoryAccess() 
+
+if getOpenedProcessID() then openProcess(getOpenedProcessID()) end 
+
+dbk_writesIgnoreWriteProtection(true)
+  
+  function AOBRep(search, change)
+local aob = AOBScan(search)
+if aob then
+  for i=0,aob.Count-1 do
+    autoAssemble(aob[i]..':\ndb '..change)
+  end
+  aob.Destroy()
+end
+end
+
+
+EmuForm = createForm(true)
+EmuForm.Caption = 'Select Emulator'
+EmuForm.Width = 310
+EmuForm.Height = 100
+
+function smartgaga()
+emu= "LdBoxHeadless"
+startmenu()
+EmuForm.hide()
+end
+EmuButton1 = createButton(EmuForm)
+EmuButton1.Left = 10
+EmuButton1.Top = 10
+EmuButton1.Width = 110
+EmuButton1.Height = 40
+EmuButton1.onClick = smartgaga
+EmuButton1.Caption = 'SmartGaga'
+
+
+function gameloop()
+emu= "aow_exe"
+startmenu()
+EmuForm.hide()
+end
+EmuButton2 = createButton(EmuForm)
+EmuButton2.Left = 170
+EmuButton2.Top = 10
+EmuButton2.Width = 110
+EmuButton2.Height = 40
+EmuButton2.onClick = gameloop
+EmuButton2.Caption = 'GameLoop'
+
+
+function startmenu()
+local p = io.popen('tasklist /fi "IMAGENAME eq '..emu..'.exe" /nh', 'r');
+local procInfo = p:read('*a');
+p:close();
+local pid = procInfo:match('%d+');
+pid = tonumber(pid);
+
+if(pid == nil)then
+messageDialog("Oyun bulunamadı, ilk önce oyunu başlatın!\nYou must start the game first!", mtWarning, mbOK)
+closeCE()
+else
+openProcess(pid)
+
+----------------HACK MENU START----------------
+
+function shfo()
+searchV= '01 00 00 00 04 00 00 00 00 00 00 00 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F'
+replaceV= '01 00 00 00 04 00 00 00 00 00 00 00 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40'
+AOBRep(searchV, replaceV)
+end
+function shff()
+replaceV= '01 00 00 00 04 00 00 00 00 00 00 00 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F'
+searchV= '01 00 00 00 04 00 00 00 00 00 00 00 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40 00 00 00 40'
+AOBRep(searchV, replaceV)
+end
+
+function jhfo()
+searchV = 'FF ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? 01 00 00 00 00 00 80 3F 00 00 0C 42 00 80 DD 43 00 00 00 00 00 00 5C 42 E8'
+replaceV = 'FF ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? 01 00 00 00 00 00 40 40 00 00 0C 42 00 40 1C 45 00 00 00 00 00 00 5C 42 E8'
+AOBRep(searchV,replaceV)
+end
+function jhff()
+replaceV = 'FF ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? 01 00 00 00 00 00 80 3F 00 00 0C 42 00 80 DD 43 00 00 00 00 00 00 5C 42 E8'
+searchV = 'FF ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? 01 00 00 00 00 00 40 40 00 00 0C 42 00 40 1C 45 00 00 00 00 00 00 5C 42 E8'
+AOBRep(searchV,replaceV)
+end
+
+function twfo()
+searchV = '00 20 41 00 00 34 42 00 00 20 ? ? ? ? ?'
+replaceV = 'C0 79 44 00 00 34 42 00 00 20 ? ? ? ? ?'
+AOBRep(searchV,replaceV)
+end
+function twff()
+replaceV = '00 20 41 00 00 34 42 00 00 20 ? ? ? ? ?'
+searchV = 'C0 79 44 00 00 34 42 00 00 20 ? ? ? ? ?'
+AOBRep(searchV,replaceV)
+end
+
+function anfo()
+searchV = 'F3 ? ? ? ? ? ? 42 ? ? ? ? ? 00 80 3F 00 00 80 3F 00 00 80 3F 01'
+replaceV = '00 00 FC 3F 00 00 FC 3F EA D2 C9 C2 00 C0 79 44 00 00 80 3F 00 00 80 3F 01'
+AOBRep(searchV,replaceV)
+end
+function anff()
+replaceV = 'F3 02 B1 42 3F 8E AE 42 EA D2 C9 C2 00 00 80 3F 00 00 80 3F 00 00 80 3F 01 '
+searchV = '00 00 FC 3F 00 00 FC 3F EA D2 C9 C2 00 C0 79 44 00 00 80 3F 00 00 80 3F 01'
+AOBRep(searchV,replaceV)
+end
+
+function aifo()
+searchV = '00 00 00 41 00 00 70 41'
+replaceV = '41 70 00 00 42 AA 00 00'
+AOBRep(searchV,replaceV)
+end
+function aiff()
+replaceV = '00 00 00 41 00 00 70 41'
+searchV = '41 70 00 00 42 AA 00 00'
+AOBRep(searchV,replaceV)
+end
+
+function fhfo()
+autoAssemble([[
+aobscan(fovhack1,66 0F 6E 7A 00 8B 5*)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+mov  [edx+00],(float)750
+code:
+  movd xmm7,[edx+00]
+  jmp return
+
+fovhack1:
+  jmp newmem
+return:
+registersymbol(fovhack1)
+]])
+end
+
+function fhff()
+autoAssemble([[
+fovhack1:
+  db 66 0F 6E 7A 00
+
+unregistersymbol(fovhack1)
+dealloc(newmem)
+]])
+end
+
+function mbfo()
+searchV = 'B8 41 00 00 C8 41 00 00 F4 41' --off
+searchV2 = 'B8 41 00 00 AF 43 00 00 AF 43' --hs
+replaceV = 'B8 41 00 00 2F 44 00 00 2F 44' --mb
+AOBRep(searchV,replaceV)
+AOBRep(searchV2,replaceV)
+end
+function ahfo()
+searchV = 'B8 41 00 00 C8 41 00 00 F4 41' --off
+replaceV = 'B8 41 00 00 AF 43 00 00 AF 43' --hs
+searchV2 = 'B8 41 00 00 2F 44 00 00 2F 44' --mb
+AOBRep(searchV,replaceV)
+AOBRep(searchV2,replaceV)
+end
+function dgff()
+replaceV = 'B8 41 00 00 C8 41 00 00 F4 41' --off
+searchV = 'B8 41 00 00 AF 43 00 00 AF 43' --hs
+searchV2 = 'B8 41 00 00 2F 44 00 00 2F 44' --mb
+AOBRep(searchV,replaceV)
+AOBRep(searchV2,replaceV)
+end
+
+function cwfo()
+searchV = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 00 80 3F' --off
+searchV2 = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 C0 79 C4' --black
+replaceV = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 C0 79 44' --white
+AOBRep(searchV,replaceV)
+AOBRep(searchV2,replaceV)
+end
+function cbfo()
+searchV = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 00 80 3F' --off
+replaceV = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 C0 79 C4' --black
+searchV2 = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 C0 79 44' --white
+AOBRep(searchV,replaceV)
+AOBRep(searchV2,replaceV)
+end
+function chff()
+replaceV = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 00 80 3F' --off
+searchV = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 C0 79 C4' --black
+searchV2 = '10 EF BC ? ? ? ? 44 BA ? ? ? ? D6 00 9F 00 C0 79 44' --white
+AOBRep(searchV,replaceV)
+AOBRep(searchV2,replaceV)
+end
+
+
+MyForm = createForm(true)
+MyForm.Caption = 'Murp Hack v1.0'
+MyForm.Width = 550
+MyForm.Height = 600
+
+
+shl = createLabel(MyForm)
+shl.Caption= 'Speed Hack*'
+shl.Left = 10
+shl.Top = 10
+
+shbo = createButton(MyForm)
+shbo.Left = 10
+shbo.Top = 35
+shbo.Width = 125
+shbo.Height = 40
+shbo.onClick = shfo
+shbo.Caption = 'On'
+
+shbf = createButton(MyForm)
+shbf.Left = 110
+shbf.Top = 35
+shbf.Width = 125
+shbf.Height = 40
+shbf.onClick = shff
+shbf.Caption = 'Off'
+---
+jhl = createLabel(MyForm)
+jhl.Caption= 'Jump Hack*'
+jhl.Left = 300
+jhl.Top = 10
+
+jhbo = createButton(MyForm)
+jhbo.Left = 300
+jhbo.Top = 35
+jhbo.Width = 125
+jhbo.Height = 40
+jhbo.onClick = jhfo
+jhbo.Caption = 'On'
+
+jhbf = createButton(MyForm)
+jhbf.Left = 400
+jhbf.Top = 35
+jhbf.Width = 125
+jhbf.Height = 40
+jhbf.onClick = jhff
+jhbf.Caption = 'Off'
+---/
+
+
+anl = createLabel(MyForm)
+anl.Caption= 'Antenna Hack'
+anl.Left = 10
+anl.Top = 110
+
+anbo = createButton(MyForm)
+anbo.Left = 10
+anbo.Top = 135
+anbo.Width = 125
+anbo.Height = 40
+anbo.onClick = anfo
+anbo.Caption = 'On'
+
+anbf = createButton(MyForm)
+anbf.Left = 110
+anbf.Top = 135
+anbf.Width = 125
+anbf.Height = 40
+anbf.onClick = anff
+anbf.Caption = 'Off'
+---
+fhl = createLabel(MyForm)
+fhl.Caption= 'FOV Hack'
+fhl.Left = 300
+fhl.Top = 110
+
+fhbo = createButton(MyForm)
+fhbo.Left = 300
+fhbo.Top = 135
+fhbo.Width = 125
+fhbo.Height = 40
+fhbo.onClick = fhfo
+fhbo.Caption = 'On'
+
+fhbf = createButton(MyForm)
+fhbf.Left = 400
+fhbf.Top = 135
+fhbf.Width = 125
+fhbf.Height = 40
+fhbf.onClick = fhff
+fhbf.Caption = 'Off'
+---/
+
+twl = createLabel(MyForm)
+twl.Caption= 'Through Wall*'
+twl.Left = 10
+twl.Top = 210
+
+twbo = createButton(MyForm)
+twbo.Left = 10
+twbo.Top = 235
+twbo.Width = 125
+twbo.Height = 40
+twbo.onClick = twfo
+twbo.Caption = 'On'
+
+twbf = createButton(MyForm)
+twbf.Left = 110
+twbf.Top = 235
+twbf.Width = 125
+twbf.Height = 40
+twbf.onClick = twff
+twbf.Caption = 'Off'
+---
+ail = createLabel(MyForm)
+ail.Caption= 'Aimbot'
+ail.Left = 300
+ail.Top = 210
+
+aibo = createButton(MyForm)
+aibo.Left = 300
+aibo.Top = 235
+aibo.Width = 125
+aibo.Height = 40
+aibo.onClick = aifo
+aibo.Caption = 'On'
+
+aibf = createButton(MyForm)
+aibf.Left = 400
+aibf.Top = 235
+aibf.Width = 125
+aibf.Height = 40
+aibf.onClick = aiff
+aibf.Caption = 'Off'
+---/
+
+dgl = createLabel(MyForm)
+dgl.Caption= 'Danger Hack'
+dgl.Left = 10
+dgl.Top = 310
+
+mbbo = createButton(MyForm)
+mbbo.Left = 10
+mbbo.Top = 335
+mbbo.Width = 150
+mbbo.Height = 40
+mbbo.onClick = mbfo
+mbbo.Caption = 'Magic Bullet'
+
+ahbf = createButton(MyForm)
+ahbf.Left = 135
+ahbf.Top = 335
+ahbf.Width = 150
+ahbf.Height = 40
+ahbf.onClick = ahfo
+ahbf.Caption = 'Auto Headshot'
+
+dgbf = createButton(MyForm)
+dgbf.Left = 270
+dgbf.Top = 335
+dgbf.Width = 125
+dgbf.Height = 40
+dgbf.onClick = dgff
+dgbf.Caption = 'Off'
+---/
+
+chl = createLabel(MyForm)
+chl.Caption= 'Color Hack**'
+chl.Left = 10
+chl.Top = 410
+
+cbbo = createButton(MyForm)
+cbbo.Left = 10
+cbbo.Top = 435
+cbbo.Width = 150
+cbbo.Height = 40
+cbbo.onClick = cbfo
+cbbo.Caption = 'Black'
+
+cwbf = createButton(MyForm)
+cwbf.Left = 135
+cwbf.Top = 435
+cwbf.Width = 150
+cwbf.Height = 40
+cwbf.onClick = cwfo
+cwbf.Caption = 'White'
+
+chbf = createButton(MyForm)
+chbf.Left = 270
+chbf.Top = 435
+chbf.Width = 125
+chbf.Height = 40
+chbf.onClick = chff
+chbf.Caption = 'Off'
+---/
+
+info1l = createLabel(MyForm)
+info1l.Caption= '* -> Her maç aktifleştirilmeli. - You must activate hack in every match.'
+info1l.Left = 10
+info1l.Top = 510
+
+info2l = createLabel(MyForm)
+info2l.Caption= '** -> Lobide aktifleştirilmeli. - You must activate hack in lobby.'
+info2l.Left = 10
+info2l.Top = 535
+
+info3l = createLabel(MyForm)
+info3l.Caption= 'https://www.unknowncheats.me - Kailim murp'
+info3l.Left = 60
+info3l.Top = 560
+info3l.Font.Color= 0xff0000 
+info3l.Font.Size= 12
+
+----------------HACK MENU FINISH----------------
+
+
+end
+end
+</LuaScript>
+</CheatTable>

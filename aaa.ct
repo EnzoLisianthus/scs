@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="28">
+<UserdefinedSymbols/>
+<LuaScript>
+dbk_initialize()
+dbk_useKernelmodeOpenProcess()
+dbk_useKernelmodeProcessMemoryAccess()
+dbk_writesIgnoreWriteProtection(true)
+-- Created by CODLAYICI
+--============================================================
+--AOB REPLACE FUNCTION
+function AOBRep(search, change)
+local aob = AOBScan(search)
+if aob then
+for i=0,aob.Count-1 do
+autoAssemble(aob..':\ndb '..change)
+[*] end
+[*] aob.Destroy()
+[*] end
+[*]end
+[*]-- Created by CODLAYICI
+[*]--============================================================
+[*]EmuSelection = createForm(true)
+[*]EmuSelection.Caption = 'CODLAYICI'
+[*]EmuSelection.Width = 140
+[*]EmuSelection.Height = 150
+[*]--============================================================
+[*]--FUNCTION WHEN GAMELOOP IS SELECTED
+[*]-- Created by CODLAYICI
+[*]function gameloop()
+[*] speak('private bypass initiated')
+[*] emu= "aow_exe"
+[*] startmenu()
+[*] EmuSelection.hide()
+[*]end
+[*]-- Created by CODLAYICI
+[*]--============================================================
+[*]GameloopSel = createButton(EmuSelection)
+[*]GameloopSel.Left = 12
+[*]GameloopSel.Top = 17
+[*]GameloopSel.Width = 110
+[*]GameloopSel.Height = 50
+[*]GameloopSel.onClick = gameloop
+[*]GameloopSel.Caption = 'GAMELOOP'
+[*]--============================================================
+[*]function startmenu()
+[*] local p = io.popen('tasklist /fi "IMAGENAME eq '..emu..'.exe" /fi "MEMUSAGE gt 300000" /nh', 'r');
+[*] local procInfo = p:read('*a');
+[*] p:close();
+[*] local pid = procInfo:match('%d+');
+[*] pid = tonumber(pid);
+[*] if(pid == nil)then
+[*] showMessage("The operation is not defined. try again. it will work!")
+[*] closeCE()
+[*] else
+[*] openProcess(pid)
+[*] MyForm = createForm(true)
+[*] MyForm.Caption = 'By CODER-MAN'
+[*] speak('coder man')
+[*] MyForm.Width = 300
+[*] MyForm.Height = 50
+[*] MyForm.Color = 0x000000
+[*] MyForm.setOnClose(FormClose)
+[*] -- Created by CODLAYICI
+[*]--============================================================
+[*] shl = createLabel(MyForm)
+[*] shl.Caption= 'BYPASS EMULATOR'
+[*] shl.Left = 15
+[*] shl.Top = 15
+[*] shl.Font.Color= 0x00FF00
+[*]
+[*] shbo = createButton(MyForm)
+[*] shbo.Left = 180
+[*] shbo.Top = 5
+[*] shbo.Width = 100
+[*] shbo.Height = 40
+[*] shbo.onClick = libPatch
+[*] shbo.Caption = 'ON'
+[*] end
+[*]end
+[*]-- Created by CODLAYICI
+[*]--============================================================
+[*]
+[*]function libPatch()
+[*] LibUE4 = AOBScan("7F 45 4C 46 01 01 01 00 00 00 00 00 00 00 00 00 03 00 28 00 01 00 00 00 00 60 05 02 34 00 00 00 58 B1 52 08 00 02 00 05 34 00 20 00 0D 00 28 00 1A 00 19 00 06 00 00 00")
+[*] if (LibUE4 == nil) then
+[*] messageDialog("UE4 Address not found.", mtWarning, mbOK)
+[*] --closeCE()
+[*] else
+[*] for enummer=0, LibUE4.Count-1 do
+[*] UE4 = tonumber(LibUE4[enummer], 16);
+[*] print(UE4)
+[*]writeBytes(UE4 + 0x3A4D8FC, 0x00,0xF0,0x20,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(UE4 + 0x3BF226C, 0x00,0xF0,0x20,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(UE4 + 0x3AC15D0, 0x00,0xF0,0x20,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(UE4 + 0x3F7C33C, 0x00,0xF0,0x20,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]end
+[*]end
+[*]-- Created by CODLAYICI
+[*] ANOGS = AOBScan("7F 45 4C 46 01 01 01 00 00 00 00 00 00 00 00 00 03 00 28 00 01 00 00 00 00 00 00 00 34 00 00 00 C0 FA 3D 00 00 02 00 05 34 00 20 00 08 00 28 00 1D 00 1C 00 06 00 00 00")
+[*] if (ANOGS == nil) then
+[*] messageDialog("ANOGS Address not found.", mtWarning, mbOK)
+[*] --closeCE()
+[*] else
+[*] for enummex=0, ANOGS.Count-1 do
+[*] ANOGS = tonumber(ANOGS[enummex], 16);
+[*] print(ANOGS)
+[*]writeBytes(ANOGS + 0x33FB0, 0x00,0xBF,0x70,0x47);
+[*]writeBytes(ANOGS + 0x33FEC, 0x00,0xBF,0x70,0x47);
+[*]writeBytes(ANOGS + 0x321A20, 0x00,0xBF,0x70,0x47);
+[*]writeBytes(ANOGS + 0x321904, 0x00,0xBF,0x70,0x47);
+[*]writeBytes(ANOGS + 0x26C354, 0x00,0xBF,0x70,0x47);
+[*]writeBytes(ANOGS + 0x295918, 0x00,0xBF,0x70,0x47);
+[*]writeBytes(ANOGS + 0x1089EC, 0x64,0x09,0xA0,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(ANOGS + 0x108AF4, 0x64,0x09,0xA0,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(ANOGS + 0x108E10, 0x64,0x09,0xA0,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(ANOGS + 0x1093DC, 0x64,0x09,0xA0,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(ANOGS + 0x1094B0, 0x64,0x09,0xA0,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(ANOGS + 0x1096BC, 0x64,0x09,0xA0,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]writeBytes(ANOGS + 0x109720, 0x64,0x09,0xA0,0xE3,0x1E,0xFF,0x2F,0xE1);
+[*]end
+[*]end
+[*]-- Created by CODLAYICI
+[*] libGCLOUD = AOBScan("7F 45 4C 46 01 01 01 00 00 00 00 00 00 00 00 00 03 00 28 00 01 00 00 00 00 00 00 00 34 00 00 00 38 B0 36 00 00 00 00 05 34 00 20 00 08 00 28 00 18 00 17 00 06 00 00 00")
+if (libGCLOUD == nil) then
+messageDialog("libGCLOUD Address not found.", mtWarning, mbOK)
+--closeCE()
+else
+for enummer=0, libGCLOUD.Count-1 do
+GCLOUD = tonumber(libGCLOUD[enummer], 16);
+print(GCLOUD)
+writeBytes(GCLOUD + 0x102C30, 0x00,0xBF,0x70,0x47);
+writeBytes(GCLOUD + 0xFEB4C, 0x00,0xBF,0x70,0x47);
+messageDialog("bypass done", mtdone, mbOK)
+end
+end
+end
+
+-- Created by CODLAYICI
+
+
+</LuaScript>
+</CheatTable>
