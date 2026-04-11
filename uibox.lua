@@ -1074,6 +1074,9 @@ function Library:CreateWindow(title)
 	end))
 
 	registerConnection(RunService.RenderStepped:Connect(function(dt)
+		if minimized then
+			iconShell.Position = holder.Position
+		end
 		if destroyed then
 			return
 		end
