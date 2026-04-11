@@ -1023,7 +1023,12 @@ function Library:CreateWindow(title)
 				Size = UDim2.fromOffset(0,0)
 			})
 
-			iconShell.Position = holder.Position
+			iconShell.Position = UDim2.new(
+			holder.Position.X.Scale,
+			holder.Position.X.Offset + holder.Size.X.Offset/2,
+			holder.Position.Y.Scale,
+			holder.Position.Y.Offset + holder.Size.Y.Offset/2
+			)
 
 			tween(iconLabel, TweenInfo.new(0.2), {
 				TextTransparency = 1
