@@ -1079,7 +1079,7 @@ function Library:CreateWindow(title)
 			dragStartPos = target
 		end
 	end))
-	
+	 
 	registerConnection(dragArea.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = false
