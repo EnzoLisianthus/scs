@@ -5,9 +5,9 @@ local Library = {}
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-
 local WINDOW_NAME = "LiquidGlassDynamic"
 
 local function safeDisconnect(conn)
@@ -16,6 +16,12 @@ local function safeDisconnect(conn)
 			conn:Disconnect()
 		end)
 	end
+end
+
+local function tween(instance, info, props)
+	local t = TweenService:Create(instance, info, props)
+	t:Play()
+	return t
 end
 
 function Library:CreateWindow(title)
@@ -32,9 +38,15 @@ function Library:CreateWindow(title)
 	local minimized = false
 	local maximized = false
 
-	local baseSize = UDim2.fromOffset(860, 560)
-	local maxSize = UDim2.fromOffset(1120, 720)
-	local minSize = UDim2.fromOffset(300, 92)
+	local baseSize = UDim2.fromOffset(780, 500)
+	local maxSize = UDim2.fromOffset(1030, 650)
+	local minimizedSize = UDim2.fromOffset(74, 74)
+
+	local baseCorner = 36
+	local minimizedCorner = 999
+
+	local currentSize = baseSize
+	local restorePosition = UDim2.new(0.5, -390, 0.5, -250)
 
 	local screen = Instance.new("ScreenGui")
 	screen.Name = WINDOW_NAME
@@ -52,49 +64,26 @@ function Library:CreateWindow(title)
 	local holder = Instance.new("Frame")
 	holder.Name = "Holder"
 	holder.Size = baseSize
-	holder.Position = UDim2.new(0.5, -430, 0.5, -280)
+	holder.Position = restorePosition
 	holder.BackgroundTransparency = 1
 	holder.Parent = root
-
-	local shadow = Instance.new("Frame")
-	shadow.Name = "Shadow"
-	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-	shadow.Position = UDim2.fromScale(0.5, 0.5)
-	shadow.Size = UDim2.new(1, 34, 1, 34)
-	shadow.BackgroundColor3 = Color3.fromRGB(160, 175, 200)
-	shadow.BackgroundTransparency = 0.88
-	shadow.ZIndex = 0
-	shadow.Parent = holder
-
-	local shadowCorner = Instance.new("UICorner")
-	shadowCorner.CornerRadius = UDim.new(0, 38)
-	shadowCorner.Parent = shadow
-
-	local shadowGrad = Instance.new("UIGradient")
-	shadowGrad.Rotation = 90
-	shadowGrad.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0.00, 0.18),
-		NumberSequenceKeypoint.new(0.45, 0.45),
-		NumberSequenceKeypoint.new(1.00, 0.85),
-	}
-	shadowGrad.Parent = shadow
 
 	local window = Instance.new("Frame")
 	window.Name = "Window"
 	window.Size = UDim2.fromScale(1, 1)
 	window.BackgroundColor3 = Color3.fromRGB(210, 220, 235)
-	window.BackgroundTransparency = 0.58
+	window.BackgroundTransparency = 0.56
 	window.BorderSizePixel = 0
-	window.ZIndex = 1
+	window.ZIndex = 2
 	window.Parent = holder
 
 	local windowCorner = Instance.new("UICorner")
-	windowCorner.CornerRadius = UDim.new(0, 34)
+	windowCorner.CornerRadius = UDim.new(0, baseCorner)
 	windowCorner.Parent = window
 
 	local baseStroke = Instance.new("UIStroke")
 	baseStroke.Name = "BaseStroke"
-	baseStroke.Thickness = 1.25
+	baseStroke.Thickness = 1.2
 	baseStroke.Color = Color3.fromRGB(255, 255, 255)
 	baseStroke.Transparency = 0.62
 	baseStroke.Parent = window
@@ -103,68 +92,90 @@ function Library:CreateWindow(title)
 	dynamicStroke.Name = "DynamicStroke"
 	dynamicStroke.Thickness = 2
 	dynamicStroke.Color = Color3.fromRGB(255, 255, 255)
-	dynamicStroke.Transparency = 0.12
+	dynamicStroke.Transparency = 0.10
 	dynamicStroke.Parent = window
 
 	local edgeGrad = Instance.new("UIGradient")
 	edgeGrad.Rotation = 0
 	edgeGrad.Transparency = NumberSequence.new{
 		NumberSequenceKeypoint.new(0.00, 1.00),
-		NumberSequenceKeypoint.new(0.42, 0.28),
+		NumberSequenceKeypoint.new(0.43, 0.24),
 		NumberSequenceKeypoint.new(0.50, 0.00),
-		NumberSequenceKeypoint.new(0.58, 0.28),
+		NumberSequenceKeypoint.new(0.57, 0.24),
 		NumberSequenceKeypoint.new(1.00, 1.00),
 	}
 	edgeGrad.Parent = dynamicStroke
 	table.insert(edgeGradients, edgeGrad)
 
-	local windowGrad = Instance.new("UIGradient")
-	windowGrad.Rotation = 90
-	windowGrad.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0.00, 0.42),
-		NumberSequenceKeypoint.new(0.55, 0.58),
-		NumberSequenceKeypoint.new(1.00, 0.76),
+	local fillGrad = Instance.new("UIGradient")
+	fillGrad.Rotation = 90
+	fillGrad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0.00, 0.40),
+		NumberSequenceKeypoint.new(0.45, 0.56),
+		NumberSequenceKeypoint.new(1.00, 0.74),
 	}
-	windowGrad.Parent = window
-
-	local verticalSplit = Instance.new("Frame")
-	verticalSplit.Name = "VerticalSplit"
-	verticalSplit.Size = UDim2.new(0, 1, 1, -22)
-	verticalSplit.Position = UDim2.new(0, 248, 0, 11)
-	verticalSplit.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	verticalSplit.BackgroundTransparency = 0.78
-	verticalSplit.BorderSizePixel = 0
-	verticalSplit.ZIndex = 2
-	verticalSplit.Parent = window
+	fillGrad.Parent = window
 
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
-	sidebar.Size = UDim2.new(0, 248, 1, 0)
+	sidebar.Size = UDim2.new(0, 236, 1, 0)
 	sidebar.BackgroundTransparency = 1
-	sidebar.ZIndex = 2
+	sidebar.ZIndex = 3
 	sidebar.Parent = window
 
 	local sidebarPadding = Instance.new("UIPadding")
 	sidebarPadding.PaddingTop = UDim.new(0, 16)
+	sidebarPadding.PaddingBottom = UDim.new(0, 16)
 	sidebarPadding.PaddingLeft = UDim.new(0, 16)
 	sidebarPadding.PaddingRight = UDim.new(0, 14)
-	sidebarPadding.PaddingBottom = UDim.new(0, 16)
 	sidebarPadding.Parent = sidebar
+
+	local split = Instance.new("Frame")
+	split.Name = "Split"
+	split.Size = UDim2.new(0, 1, 1, -24)
+	split.Position = UDim2.new(0, 236, 0, 12)
+	split.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	split.BackgroundTransparency = 0.80
+	split.BorderSizePixel = 0
+	split.ZIndex = 3
+	split.Parent = window
 
 	local content = Instance.new("Frame")
 	content.Name = "Content"
-	content.Position = UDim2.new(0, 249, 0, 0)
-	content.Size = UDim2.new(1, -249, 1, 0)
+	content.Size = UDim2.new(1, -237, 1, 0)
+	content.Position = UDim2.new(0, 237, 0, 0)
 	content.BackgroundTransparency = 1
-	content.ZIndex = 2
+	content.ZIndex = 3
 	content.Parent = window
 
 	local contentPadding = Instance.new("UIPadding")
-	contentPadding.PaddingTop = UDim.new(0, 16)
+	contentPadding.PaddingTop = UDim.new(0, 18)
+	contentPadding.PaddingBottom = UDim.new(0, 18)
 	contentPadding.PaddingLeft = UDim.new(0, 18)
 	contentPadding.PaddingRight = UDim.new(0, 18)
-	contentPadding.PaddingBottom = UDim.new(0, 18)
 	contentPadding.Parent = content
+
+	local iconShell = Instance.new("TextButton")
+	iconShell.Name = "MinimizedIcon"
+	iconShell.Size = UDim2.fromScale(1, 1)
+	iconShell.BackgroundTransparency = 1
+	iconShell.Text = ""
+	iconShell.AutoButtonColor = false
+	iconShell.Visible = false
+	iconShell.ZIndex = 8
+	iconShell.Parent = window
+
+	local iconLabel = Instance.new("TextLabel")
+	iconLabel.Name = "IconLabel"
+	iconLabel.Size = UDim2.fromScale(1, 1)
+	iconLabel.BackgroundTransparency = 1
+	iconLabel.Text = "♡"
+	iconLabel.Font = Enum.Font.GothamBold
+	iconLabel.TextScaled = true
+	iconLabel.TextColor3 = Color3.fromRGB(42, 42, 42)
+	iconLabel.ZIndex = 9
+	iconLabel.Visible = false
+	iconLabel.Parent = window
 
 	local function registerConnection(conn)
 		table.insert(connections, conn)
@@ -180,6 +191,7 @@ function Library:CreateWindow(title)
 		for _, conn in ipairs(connections) do
 			safeDisconnect(conn)
 		end
+
 		table.clear(connections)
 		table.clear(edgeGradients)
 
@@ -198,9 +210,9 @@ function Library:CreateWindow(title)
 			frame.Position = position
 		end
 		frame.BackgroundColor3 = Color3.fromRGB(210, 220, 235)
-		frame.BackgroundTransparency = 0.60
+		frame.BackgroundTransparency = 0.58
 		frame.BorderSizePixel = 0
-		frame.ZIndex = zindex or 3
+		frame.ZIndex = zindex or 4
 		frame.Parent = parent
 
 		local corner = Instance.new("UICorner")
@@ -214,30 +226,30 @@ function Library:CreateWindow(title)
 		base.Parent = frame
 
 		local dyn = Instance.new("UIStroke")
-		dyn.Thickness = 1.8
+		dyn.Thickness = 1.7
 		dyn.Color = Color3.fromRGB(255, 255, 255)
-		dyn.Transparency = 0.20
+		dyn.Transparency = 0.18
 		dyn.Parent = frame
 
-		local gradDyn = Instance.new("UIGradient")
-		gradDyn.Rotation = 0
-		gradDyn.Transparency = NumberSequence.new{
+		local dynGrad = Instance.new("UIGradient")
+		dynGrad.Rotation = 0
+		dynGrad.Transparency = NumberSequence.new{
 			NumberSequenceKeypoint.new(0.00, 1.00),
-			NumberSequenceKeypoint.new(0.43, 0.38),
-			NumberSequenceKeypoint.new(0.50, 0.02),
-			NumberSequenceKeypoint.new(0.57, 0.38),
+			NumberSequenceKeypoint.new(0.43, 0.36),
+			NumberSequenceKeypoint.new(0.50, 0.03),
+			NumberSequenceKeypoint.new(0.57, 0.36),
 			NumberSequenceKeypoint.new(1.00, 1.00),
 		}
-		gradDyn.Parent = dyn
-		table.insert(edgeGradients, gradDyn)
+		dynGrad.Parent = dyn
+		table.insert(edgeGradients, dynGrad)
 
-		local fillGrad = Instance.new("UIGradient")
-		fillGrad.Rotation = 90
-		fillGrad.Transparency = NumberSequence.new{
-			NumberSequenceKeypoint.new(0.00, 0.45),
+		local inner = Instance.new("UIGradient")
+		inner.Rotation = 90
+		inner.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0.00, 0.44),
 			NumberSequenceKeypoint.new(1.00, 0.72),
 		}
-		fillGrad.Parent = frame
+		inner.Parent = frame
 
 		return frame
 	end
@@ -246,7 +258,7 @@ function Library:CreateWindow(title)
 	topControls.Name = "TopControls"
 	topControls.Size = UDim2.new(1, 0, 0, 18)
 	topControls.BackgroundTransparency = 1
-	topControls.ZIndex = 4
+	topControls.ZIndex = 5
 	topControls.Parent = sidebar
 
 	local function createMacDot(parent, name, color, x)
@@ -255,20 +267,20 @@ function Library:CreateWindow(title)
 		btn.Size = UDim2.fromOffset(14, 14)
 		btn.Position = UDim2.new(0, x, 0, 2)
 		btn.BackgroundColor3 = color
-		btn.AutoButtonColor = false
 		btn.Text = ""
-		btn.ZIndex = 5
+		btn.AutoButtonColor = false
+		btn.ZIndex = 6
 		btn.Parent = parent
 
-		local c = Instance.new("UICorner")
-		c.CornerRadius = UDim.new(1, 0)
-		c.Parent = btn
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(1, 0)
+		corner.Parent = btn
 
-		local s = Instance.new("UIStroke")
-		s.Thickness = 1
-		s.Color = Color3.fromRGB(255, 255, 255)
-		s.Transparency = 0.55
-		s.Parent = btn
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 1
+		stroke.Color = Color3.fromRGB(255, 255, 255)
+		stroke.Transparency = 0.55
+		stroke.Parent = btn
 
 		return btn
 	end
@@ -279,7 +291,7 @@ function Library:CreateWindow(title)
 
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "TitleLabel"
-	titleLabel.Size = UDim2.new(1, -86, 0, 34)
+	titleLabel.Size = UDim2.new(1, -90, 0, 34)
 	titleLabel.Position = UDim2.new(0, 0, 0, 28)
 	titleLabel.BackgroundTransparency = 1
 	titleLabel.Text = tostring(title or "Window")
@@ -288,12 +300,12 @@ function Library:CreateWindow(title)
 	titleLabel.Font = Enum.Font.GothamSemibold
 	titleLabel.TextSize = 24
 	titleLabel.TextColor3 = Color3.fromRGB(42, 42, 42)
-	titleLabel.ZIndex = 4
+	titleLabel.ZIndex = 5
 	titleLabel.Parent = sidebar
 
 	local subtitleLabel = Instance.new("TextLabel")
 	subtitleLabel.Name = "SubtitleLabel"
-	subtitleLabel.Size = UDim2.new(1, -10, 0, 20)
+	subtitleLabel.Size = UDim2.new(1, -10, 0, 18)
 	subtitleLabel.Position = UDim2.new(0, 0, 0, 58)
 	subtitleLabel.BackgroundTransparency = 1
 	subtitleLabel.Text = "Liquid Glass Interface"
@@ -301,17 +313,17 @@ function Library:CreateWindow(title)
 	subtitleLabel.Font = Enum.Font.Gotham
 	subtitleLabel.TextSize = 13
 	subtitleLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
-	subtitleLabel.ZIndex = 4
+	subtitleLabel.ZIndex = 5
 	subtitleLabel.Parent = sidebar
 
-	local tabListHost = createGlassBlock(sidebar, "TabListHost", UDim2.new(1, 0, 1, -98), UDim2.new(0, 0, 0, 92), 22, 3)
+	local tabHost = createGlassBlock(sidebar, "TabHost", UDim2.new(1, 0, 1, -96), UDim2.new(0, 0, 0, 92), 24, 4)
 
-	local tabListPadding = Instance.new("UIPadding")
-	tabListPadding.PaddingTop = UDim.new(0, 12)
-	tabListPadding.PaddingBottom = UDim.new(0, 12)
-	tabListPadding.PaddingLeft = UDim.new(0, 10)
-	tabListPadding.PaddingRight = UDim.new(0, 10)
-	tabListPadding.Parent = tabListHost
+	local tabHostPadding = Instance.new("UIPadding")
+	tabHostPadding.PaddingTop = UDim.new(0, 10)
+	tabHostPadding.PaddingBottom = UDim.new(0, 10)
+	tabHostPadding.PaddingLeft = UDim.new(0, 10)
+	tabHostPadding.PaddingRight = UDim.new(0, 10)
+	tabHostPadding.Parent = tabHost
 
 	local tabList = Instance.new("ScrollingFrame")
 	tabList.Name = "TabList"
@@ -319,61 +331,54 @@ function Library:CreateWindow(title)
 	tabList.BackgroundTransparency = 1
 	tabList.BorderSizePixel = 0
 	tabList.ScrollBarThickness = 0
-	tabList.CanvasSize = UDim2.new()
 	tabList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	tabList.ZIndex = 4
-	tabList.Parent = tabListHost
+	tabList.CanvasSize = UDim2.new()
+	tabList.ZIndex = 5
+	tabList.Parent = tabHost
 
-	local tabListLayout = Instance.new("UIListLayout")
-	tabListLayout.Padding = UDim.new(0, 8)
-	tabListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	tabListLayout.Parent = tabList
+	local tabLayout = Instance.new("UIListLayout")
+	tabLayout.Padding = UDim.new(0, 8)
+	tabLayout.Parent = tabList
 
 	local header = Instance.new("Frame")
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, 58)
 	header.BackgroundTransparency = 1
-	header.ZIndex = 3
+	header.ZIndex = 4
 	header.Parent = content
 
 	local headerTitle = Instance.new("TextLabel")
 	headerTitle.Name = "HeaderTitle"
-	headerTitle.Size = UDim2.new(1, -8, 0, 30)
-	headerTitle.Position = UDim2.new(0, 0, 0, 0)
+	headerTitle.Size = UDim2.new(1, 0, 0, 30)
 	headerTitle.BackgroundTransparency = 1
 	headerTitle.Text = tostring(title or "Window")
 	headerTitle.TextXAlignment = Enum.TextXAlignment.Left
 	headerTitle.Font = Enum.Font.GothamSemibold
 	headerTitle.TextSize = 26
 	headerTitle.TextColor3 = Color3.fromRGB(52, 52, 52)
-	headerTitle.ZIndex = 4
+	headerTitle.ZIndex = 5
 	headerTitle.Parent = header
 
 	local headerDesc = Instance.new("TextLabel")
 	headerDesc.Name = "HeaderDesc"
-	headerDesc.Size = UDim2.new(1, -8, 0, 20)
-	headerDesc.Position = UDim2.new(0, 0, 0, 31)
+	headerDesc.Size = UDim2.new(1, 0, 0, 18)
+	headerDesc.Position = UDim2.new(0, 0, 0, 33)
 	headerDesc.BackgroundTransparency = 1
 	headerDesc.Text = "Select a category from the sidebar."
 	headerDesc.TextXAlignment = Enum.TextXAlignment.Left
 	headerDesc.Font = Enum.Font.Gotham
 	headerDesc.TextSize = 13
 	headerDesc.TextColor3 = Color3.fromRGB(108, 108, 108)
-	headerDesc.ZIndex = 4
+	headerDesc.ZIndex = 5
 	headerDesc.Parent = header
 
 	local pageContainer = Instance.new("Frame")
 	pageContainer.Name = "PageContainer"
-	pageContainer.Size = UDim2.new(1, 0, 1, -66)
-	pageContainer.Position = UDim2.new(0, 0, 0, 66)
+	pageContainer.Size = UDim2.new(1, 0, 1, -70)
+	pageContainer.Position = UDim2.new(0, 0, 0, 70)
 	pageContainer.BackgroundTransparency = 1
-	pageContainer.ZIndex = 3
+	pageContainer.ZIndex = 4
 	pageContainer.Parent = content
-
-	local pages = {}
-	local tabButtons = {}
-	local selectedPage = nil
-	local selectedButton = nil
 
 	local dragArea = Instance.new("TextButton")
 	dragArea.Name = "DragArea"
@@ -381,8 +386,12 @@ function Library:CreateWindow(title)
 	dragArea.BackgroundTransparency = 1
 	dragArea.Text = ""
 	dragArea.AutoButtonColor = false
-	dragArea.ZIndex = 6
+	dragArea.ZIndex = 7
 	dragArea.Parent = window
+
+	local pages = {}
+	local selectedPage = nil
+	local selectedButton = nil
 
 	local target = Vector2.new(holder.Position.X.Offset, holder.Position.Y.Offset)
 	local current = target
@@ -390,32 +399,23 @@ function Library:CreateWindow(title)
 	local dragStartMouse = Vector2.zero
 	local dragStartPos = Vector2.zero
 
-	registerConnection(dragArea.InputBegan:Connect(function(input)
-		if destroyed then
-			return
-		end
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-			dragStartMouse = UserInputService:GetMouseLocation()
-			dragStartPos = target
-		end
-	end))
+	local function setChromeVisible(visible)
+		sidebar.Visible = visible
+		split.Visible = visible
+		content.Visible = visible
+		dragArea.Visible = visible
+		topControls.Visible = visible
+		titleLabel.Visible = visible
+		subtitleLabel.Visible = visible
+		tabHost.Visible = visible
+		header.Visible = visible
+		pageContainer.Visible = visible
+	end
 
-	registerConnection(dragArea.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = false
-		end
-	end))
-
-	registerConnection(UserInputService.InputChanged:Connect(function(input)
-		if destroyed then
-			return
-		end
-		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-			local delta = UserInputService:GetMouseLocation() - dragStartMouse
-			target = dragStartPos + delta
-		end
-	end))
+	local function setIconVisible(visible)
+		iconShell.Visible = visible
+		iconLabel.Visible = visible
+	end
 
 	local function setTabVisual(button, active)
 		local body = button:FindFirstChild("Body")
@@ -423,21 +423,20 @@ function Library:CreateWindow(title)
 		local accent = button:FindFirstChild("Accent")
 
 		if body and body:IsA("Frame") then
-			body.BackgroundTransparency = active and 0.38 or 0.58
+			body.BackgroundTransparency = active and 0.36 or 0.58
 		end
 
 		if label and label:IsA("TextLabel") then
 			label.TextColor3 = active and Color3.fromRGB(36, 36, 36) or Color3.fromRGB(76, 76, 76)
-			label.TextTransparency = active and 0 or 0.04
 		end
 
 		if accent and accent:IsA("Frame") then
-			accent.BackgroundTransparency = active and 0.12 or 1
+			accent.BackgroundTransparency = active and 0.10 or 1
 		end
 	end
 
 	local function switchToPage(page, button, tabTitle)
-		if destroyed then
+		if destroyed or minimized then
 			return
 		end
 
@@ -461,10 +460,10 @@ function Library:CreateWindow(title)
 	end
 
 	local function createSection(titleText)
-		local section = createGlassBlock(pageContainer, "UnusedSection", nil, nil, 24, 3)
+		local section = createGlassBlock(pageContainer, "Section", nil, nil, 24, 4)
 		section.AutomaticSize = Enum.AutomaticSize.Y
 		section.Size = UDim2.new(1, 0, 0, 0)
-		section.BackgroundTransparency = 0.54
+		section.BackgroundTransparency = 0.52
 
 		local pad = Instance.new("UIPadding")
 		pad.PaddingTop = UDim.new(0, 14)
@@ -482,7 +481,7 @@ function Library:CreateWindow(title)
 		titleObj.Font = Enum.Font.GothamSemibold
 		titleObj.TextSize = 18
 		titleObj.TextColor3 = Color3.fromRGB(46, 46, 46)
-		titleObj.ZIndex = 5
+		titleObj.ZIndex = 6
 		titleObj.Parent = section
 
 		local stack = Instance.new("Frame")
@@ -501,23 +500,23 @@ function Library:CreateWindow(title)
 	end
 
 	local function createControlShell(parent, height)
-		local shell = createGlassBlock(parent, "ControlShell", UDim2.new(1, 0, 0, height), nil, 18, 5)
-		shell.BackgroundTransparency = 0.52
+		local shell = createGlassBlock(parent, "ControlShell", UDim2.new(1, 0, 0, height), nil, 18, 6)
+		shell.BackgroundTransparency = 0.50
 		return shell
 	end
 
-	local function createText(parent, text, size, weight, color, pos, width, z)
+	local function createText(parent, text, size, font, color, pos, sizeUDim, zindex)
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
 		lbl.Text = text
 		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		lbl.TextYAlignment = Enum.TextYAlignment.Center
-		lbl.Font = weight
+		lbl.Font = font
 		lbl.TextSize = size
 		lbl.TextColor3 = color
 		lbl.Position = pos
-		lbl.Size = width
-		lbl.ZIndex = z
+		lbl.Size = sizeUDim
+		lbl.ZIndex = zindex
 		lbl.Parent = parent
 		return lbl
 	end
@@ -531,10 +530,10 @@ function Library:CreateWindow(title)
 		tabButton.BackgroundTransparency = 1
 		tabButton.AutoButtonColor = false
 		tabButton.Text = ""
-		tabButton.ZIndex = 5
+		tabButton.ZIndex = 6
 		tabButton.Parent = tabList
 
-		local body = createGlassBlock(tabButton, "Body", UDim2.fromScale(1, 1), UDim2.new(), 16, 5)
+		local body = createGlassBlock(tabButton, "Body", UDim2.fromScale(1, 1), UDim2.new(), 16, 6)
 		body.BackgroundTransparency = 0.58
 
 		local accent = Instance.new("Frame")
@@ -544,7 +543,7 @@ function Library:CreateWindow(title)
 		accent.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		accent.BackgroundTransparency = 1
 		accent.BorderSizePixel = 0
-		accent.ZIndex = 6
+		accent.ZIndex = 7
 		accent.Parent = body
 
 		local accentCorner = Instance.new("UICorner")
@@ -562,7 +561,7 @@ function Library:CreateWindow(title)
 		label.Font = Enum.Font.GothamMedium
 		label.TextSize = 16
 		label.TextColor3 = Color3.fromRGB(76, 76, 76)
-		label.ZIndex = 7
+		label.ZIndex = 8
 		label.Parent = body
 
 		local page = Instance.new("ScrollingFrame")
@@ -571,10 +570,10 @@ function Library:CreateWindow(title)
 		page.BackgroundTransparency = 1
 		page.BorderSizePixel = 0
 		page.ScrollBarThickness = 0
-		page.CanvasSize = UDim2.new()
 		page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		page.CanvasSize = UDim2.new()
 		page.Visible = false
-		page.ZIndex = 3
+		page.ZIndex = 4
 		page.Parent = pageContainer
 
 		local pagePadding = Instance.new("UIPadding")
@@ -589,7 +588,6 @@ function Library:CreateWindow(title)
 		pageLayout.Parent = page
 
 		table.insert(pages, page)
-		table.insert(tabButtons, tabButton)
 
 		registerConnection(tabButton.MouseButton1Click:Connect(function()
 			switchToPage(page, tabButton, name)
@@ -611,8 +609,7 @@ function Library:CreateWindow(title)
 
 			function api:AddLabel(text)
 				local shell = createControlShell(stack, 44)
-
-				local labelObj = createText(
+				return createText(
 					shell,
 					text,
 					15,
@@ -620,14 +617,12 @@ function Library:CreateWindow(title)
 					Color3.fromRGB(46, 46, 46),
 					UDim2.new(0, 14, 0, 0),
 					UDim2.new(1, -28, 1, 0),
-					6
+					7
 				)
-
-				return labelObj
 			end
 
 			function api:AddParagraph(head, body)
-				local shell = createControlShell(stack, 74)
+				local shell = createControlShell(stack, 78)
 
 				createText(
 					shell,
@@ -637,7 +632,7 @@ function Library:CreateWindow(title)
 					Color3.fromRGB(42, 42, 42),
 					UDim2.new(0, 14, 0, 10),
 					UDim2.new(1, -28, 0, 20),
-					6
+					7
 				)
 
 				local bodyLabel = Instance.new("TextLabel")
@@ -649,9 +644,9 @@ function Library:CreateWindow(title)
 				bodyLabel.Font = Enum.Font.Gotham
 				bodyLabel.TextSize = 13
 				bodyLabel.TextColor3 = Color3.fromRGB(92, 92, 92)
-				bodyLabel.Position = UDim2.new(0, 14, 0, 32)
-				bodyLabel.Size = UDim2.new(1, -28, 0, 30)
-				bodyLabel.ZIndex = 6
+				bodyLabel.Position = UDim2.new(0, 14, 0, 34)
+				bodyLabel.Size = UDim2.new(1, -28, 0, 32)
+				bodyLabel.ZIndex = 7
 				bodyLabel.Parent = shell
 
 				return bodyLabel
@@ -661,23 +656,22 @@ function Library:CreateWindow(title)
 				local shell = createControlShell(stack, 48)
 
 				local button = Instance.new("TextButton")
-				button.Name = "ActionButton"
-				button.Size = UDim2.new(1, 0, 1, 0)
+				button.Size = UDim2.fromScale(1, 1)
 				button.BackgroundTransparency = 1
-				button.AutoButtonColor = false
 				button.Text = ""
-				button.ZIndex = 7
+				button.AutoButtonColor = false
+				button.ZIndex = 8
 				button.Parent = shell
 
-				local labelObj = createText(
+				createText(
 					shell,
 					text,
 					15,
 					Enum.Font.GothamMedium,
 					Color3.fromRGB(40, 40, 40),
 					UDim2.new(0, 14, 0, 0),
-					UDim2.new(1, -42, 1, 0),
-					6
+					UDim2.new(1, -44, 1, 0),
+					7
 				)
 
 				local arrow = createText(
@@ -688,16 +682,20 @@ function Library:CreateWindow(title)
 					Color3.fromRGB(92, 92, 92),
 					UDim2.new(1, -24, 0, -1),
 					UDim2.new(0, 14, 1, 0),
-					6
+					7
 				)
 				arrow.TextXAlignment = Enum.TextXAlignment.Center
 
 				registerConnection(button.MouseEnter:Connect(function()
-					shell.BackgroundTransparency = 0.44
+					tween(shell, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+						BackgroundTransparency = 0.42
+					})
 				end))
 
 				registerConnection(button.MouseLeave:Connect(function()
-					shell.BackgroundTransparency = 0.52
+					tween(shell, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+						BackgroundTransparency = 0.50
+					})
 				end))
 
 				registerConnection(button.MouseButton1Click:Connect(function()
@@ -711,7 +709,6 @@ function Library:CreateWindow(title)
 
 			function api:AddToggle(text, callback, defaultValue)
 				local state = defaultValue == true
-
 				local shell = createControlShell(stack, 54)
 
 				createText(
@@ -721,21 +718,18 @@ function Library:CreateWindow(title)
 					Enum.Font.GothamMedium,
 					Color3.fromRGB(40, 40, 40),
 					UDim2.new(0, 14, 0, 0),
-					UDim2.new(1, -92, 1, 0),
-					6
+					UDim2.new(1, -96, 1, 0),
+					7
 				)
 
-				local track = createGlassBlock(shell, "ToggleTrack", UDim2.fromOffset(56, 30), UDim2.new(1, -70, 0.5, -15), 15, 6)
-				track.BackgroundTransparency = state and 0.32 or 0.48
-
+				local track = createGlassBlock(shell, "ToggleTrack", UDim2.fromOffset(56, 30), UDim2.new(1, -70, 0.5, -15), 15, 7)
 				local knob = Instance.new("Frame")
 				knob.Name = "Knob"
 				knob.Size = UDim2.fromOffset(24, 24)
-				knob.Position = state and UDim2.new(0, 29, 0, 3) or UDim2.new(0, 3, 0, 3)
 				knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				knob.BackgroundTransparency = 0.06
 				knob.BorderSizePixel = 0
-				knob.ZIndex = 8
+				knob.ZIndex = 9
 				knob.Parent = track
 
 				local knobCorner = Instance.new("UICorner")
@@ -751,21 +745,33 @@ function Library:CreateWindow(title)
 				local button = Instance.new("TextButton")
 				button.Size = UDim2.fromScale(1, 1)
 				button.BackgroundTransparency = 1
-				button.AutoButtonColor = false
 				button.Text = ""
-				button.ZIndex = 9
+				button.AutoButtonColor = false
+				button.ZIndex = 10
 				button.Parent = shell
 
-				local function renderToggle()
-					track.BackgroundTransparency = state and 0.30 or 0.48
-					knob.Position = state and UDim2.new(0, 29, 0, 3) or UDim2.new(0, 3, 0, 3)
+				local function renderToggle(animated)
+					local trackTransparency = state and 0.30 or 0.48
+					local knobPos = state and UDim2.new(0, 29, 0, 3) or UDim2.new(0, 3, 0, 3)
+
+					if animated then
+						tween(track, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+							BackgroundTransparency = trackTransparency
+						})
+						tween(knob, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+							Position = knobPos
+						})
+					else
+						track.BackgroundTransparency = trackTransparency
+						knob.Position = knobPos
+					end
 				end
 
-				renderToggle()
+				renderToggle(false)
 
 				registerConnection(button.MouseButton1Click:Connect(function()
 					state = not state
-					renderToggle()
+					renderToggle(true)
 					if callback then
 						callback(state)
 					end
@@ -775,7 +781,7 @@ function Library:CreateWindow(title)
 
 				function apiToggle:Set(value)
 					state = value == true
-					renderToggle()
+					renderToggle(true)
 					if callback then
 						callback(state)
 					end
@@ -799,11 +805,11 @@ function Library:CreateWindow(title)
 					Color3.fromRGB(40, 40, 40),
 					UDim2.new(0, 14, 0, 0),
 					UDim2.new(0.42, -8, 1, 0),
-					6
+					7
 				)
 
-				local boxShell = createGlassBlock(shell, "InputGlass", UDim2.new(0.58, -18, 0, 38), UDim2.new(0.42, 6, 0.5, -19), 14, 6)
-				boxShell.BackgroundTransparency = 0.50
+				local inputGlass = createGlassBlock(shell, "InputGlass", UDim2.new(0.58, -18, 0, 38), UDim2.new(0.42, 6, 0.5, -19), 14, 7)
+				inputGlass.BackgroundTransparency = 0.48
 
 				local box = Instance.new("TextBox")
 				box.Name = "InputBox"
@@ -819,10 +825,19 @@ function Library:CreateWindow(title)
 				box.TextSize = 14
 				box.TextColor3 = Color3.fromRGB(44, 44, 44)
 				box.PlaceholderColor3 = Color3.fromRGB(124, 124, 124)
-				box.ZIndex = 7
-				box.Parent = boxShell
+				box.ZIndex = 8
+				box.Parent = inputGlass
+
+				registerConnection(box.Focused:Connect(function()
+					tween(inputGlass, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+						BackgroundTransparency = 0.40
+					})
+				end))
 
 				registerConnection(box.FocusLost:Connect(function(enterPressed)
+					tween(inputGlass, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+						BackgroundTransparency = 0.48
+					})
 					if callback then
 						callback(box.Text, enterPressed)
 					end
@@ -876,31 +891,13 @@ function Library:CreateWindow(title)
 		cleanup()
 	end
 
-	function Window:Minimize(state)
-		if destroyed then
-			return
-		end
-
-		if typeof(state) == "boolean" then
-			minimized = state
-		else
-			minimized = not minimized
-		end
-
-		if minimized then
-			content.Visible = false
-			verticalSplit.Visible = false
-			holder.Size = minSize
-		else
-			content.Visible = true
-			verticalSplit.Visible = true
-			holder.Size = maximized and maxSize or baseSize
-		end
-	end
-
 	function Window:Maximize(state)
 		if destroyed then
 			return
+		end
+
+		if minimized then
+			self:Minimize(false)
 		end
 
 		if typeof(state) == "boolean" then
@@ -909,13 +906,71 @@ function Library:CreateWindow(title)
 			maximized = not maximized
 		end
 
-		if minimized then
-			minimized = false
-			content.Visible = true
-			verticalSplit.Visible = true
+		currentSize = maximized and maxSize or baseSize
+
+		tween(holder, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = currentSize
+		})
+	end
+
+	function Window:Minimize(state)
+		if destroyed then
+			return
 		end
 
-		holder.Size = maximized and maxSize or baseSize
+		local nextState
+		if typeof(state) == "boolean" then
+			nextState = state
+		else
+			nextState = not minimized
+		end
+
+		if nextState == minimized then
+			return
+		end
+
+		minimized = nextState
+
+		if minimized then
+			restorePosition = holder.Position
+			setChromeVisible(false)
+			setIconVisible(true)
+
+			tween(windowCorner, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				CornerRadius = UDim.new(1, 0)
+			})
+
+			tween(holder, TweenInfo.new(0.26, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Size = minimizedSize,
+				Position = UDim2.new(0.5, -37, 0.82, -37)
+			})
+
+			tween(window, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				BackgroundTransparency = 0.46
+			})
+
+			tween(iconLabel, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				TextTransparency = 0
+			})
+		else
+			setChromeVisible(true)
+			setIconVisible(false)
+
+			tween(windowCorner, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				CornerRadius = UDim.new(0, baseCorner)
+			})
+
+			currentSize = maximized and maxSize or baseSize
+
+			tween(holder, TweenInfo.new(0.26, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Size = currentSize,
+				Position = restorePosition
+			})
+
+			tween(window, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				BackgroundTransparency = 0.56
+			})
+		end
 	end
 
 	registerConnection(closeBtn.MouseButton1Click:Connect(function()
@@ -930,6 +985,38 @@ function Library:CreateWindow(title)
 		Window:Maximize()
 	end))
 
+	registerConnection(iconShell.MouseButton1Click:Connect(function()
+		Window:Minimize(false)
+	end))
+
+	registerConnection(dragArea.InputBegan:Connect(function(input)
+		if destroyed or minimized then
+			return
+		end
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStartMouse = UserInputService:GetMouseLocation()
+			dragStartPos = target
+		end
+	end))
+
+	registerConnection(dragArea.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end))
+
+	registerConnection(UserInputService.InputChanged:Connect(function(input)
+		if destroyed or minimized then
+			return
+		end
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = UserInputService:GetMouseLocation() - dragStartMouse
+			target = dragStartPos + delta
+			restorePosition = UDim2.new(0.5, target.X, 0.5, target.Y)
+		end
+	end))
+
 	local smoothOffset = 0
 
 	registerConnection(RunService.RenderStepped:Connect(function(dt)
@@ -937,10 +1024,12 @@ function Library:CreateWindow(title)
 			return
 		end
 
-		local a = 1 - math.exp(-dt * 12)
-		current = current:Lerp(target, a)
+		local follow = 1 - math.exp(-dt * 12)
+		current = current:Lerp(target, follow)
 
-		holder.Position = UDim2.new(0.5, current.X, 0.5, current.Y)
+		if not minimized then
+			holder.Position = UDim2.new(0.5, current.X, 0.5, current.Y)
+		end
 
 		local mouse = UserInputService:GetMouseLocation()
 		local absPos = window.AbsolutePosition
