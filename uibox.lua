@@ -251,8 +251,8 @@ function Library:CreateWindow(title)
 	iconLabel.Text = "愛"
 	iconLabel.Font = Enum.Font.Arial
 	iconLabel.TextScaled = true
-	iconLabel.TextColor3 = Color3.fromRGB(42, 42, 42)
-	iconLabel.TextTransparency = 1
+	iconLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	iconLabel.TextTransparency = 0.5
 	iconLabel.ZIndex = 13
 	iconLabel.Parent = iconShell
 
