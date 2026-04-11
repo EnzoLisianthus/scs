@@ -982,46 +982,45 @@ function Library:CreateWindow(title)
 
 		if minimized then
 			restorePosition = holder.Position
+
 			setChromeVisible(false)
+
 			iconShell.Visible = true
 
-			tween(windowCorner, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				CornerRadius = UDim.new(1, 0)
+			iconShell.Position = holder.Position
+
+			tween(iconShell, TweenInfo.new(0.25), {
+				Size = minimizedSize
 			})
 
-			tween(holder, TweenInfo.new(0.28, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-				Size = minimizedSize,
-				Position = minimizedPosition
+			tween(holder, TweenInfo.new(0.25), {
+				Size = minimizedSize
 			})
 
-			tween(window, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				BackgroundTransparency = 0.46
-			})
-
-			iconLabel.TextTransparency = 1
-			tween(iconLabel, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			tween(iconLabel, TweenInfo.new(0.2), {
 				TextTransparency = 0
 			})
+
 		else
 			setChromeVisible(true)
 
-			tween(windowCorner, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				CornerRadius = UDim.new(0, baseCornerRadius)
-			})
-
-			local targetSize = maximized and maxSize or baseSize
-
-			tween(holder, TweenInfo.new(0.28, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-				Size = targetSize,
+			tween(holder, TweenInfo.new(0.25), {
+				Size = maximized and maxSize or baseSize,
 				Position = restorePosition
 			})
 
-			tween(window, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				BackgroundTransparency = 0.56
+			tween(iconShell, TweenInfo.new(0.25), {
+				Size = UDim2.fromOffset(0,0)
 			})
 
-			task.delay(0.18, function()
-				if not destroyed and not minimized then
+			iconShell.Position = holder.Position
+
+			tween(iconLabel, TweenInfo.new(0.2), {
+				TextTransparency = 1
+			})
+
+			task.delay(0.2,function()
+				if not minimized then
 					iconShell.Visible = false
 				end
 			end)
