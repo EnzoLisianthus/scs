@@ -37,6 +37,7 @@ function Library:CreateWindow(title)
 	local minimized = false
 	local maximized = false
 	local dragging = false
+	local isDraggingClick = false
 
 	local baseSize = UDim2.fromOffset(780, 500)
 	local maxSize = UDim2.fromOffset(1030, 650)
@@ -1055,7 +1056,8 @@ function Library:CreateWindow(title)
 	end))
 
 	registerConnection(iconShell.MouseButton1Click:Connect(function()
-		Window:Minimize(false)
+		if isDraggingClick then return end -- 🔥 핵심
+			Window:Minimize(false)
 	end))
 
 	registerConnection(dragArea.InputBegan:Connect(function(input)
@@ -1075,12 +1077,19 @@ function Library:CreateWindow(title)
 
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
+			isDraggingClick = false -- 🔥 추가
+
 			dragStartMouse = UserInputService:GetMouseLocation()
 			dragStartPos = target
 		end
 	end))
-	 
 	registerConnection(dragArea.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end))
+
+	registerConnection(iconShell.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = false
 		end
@@ -1092,6 +1101,7 @@ function Library:CreateWindow(title)
 		end
 
 		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			isDraggingClick = true
 			local delta = UserInputService:GetMouseLocation() - dragStartMouse
 			target = dragStartPos + delta
 			restorePosition = UDim2.new(0.5, target.X, 0.5, target.Y)
