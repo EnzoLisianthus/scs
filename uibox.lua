@@ -188,7 +188,12 @@ function Library:CreateWindow(title)
 	iconShell.Name = "MinimizedIcon"
 	iconShell.AnchorPoint = Vector2.new(0.5, 0.5)
 	iconShell.Size = UDim2.fromOffset(minimizedSize.X.Offset, minimizedSize.Y.Offset)
-	iconShell.Position = holder.Position
+	iconShell.Position = UDim2.new(
+	holder.Position.X.Scale,
+	holder.Position.X.Offset + holder.Size.X.Offset/2,
+	holder.Position.Y.Scale,
+	holder.Position.Y.Offset + holder.Size.Y.Offset/2
+	)
 	iconShell.BackgroundColor3 = Color3.fromRGB(210, 220, 235)
 	iconShell.BackgroundTransparency = 0.46
 	iconShell.Text = ""
