@@ -1070,6 +1070,16 @@ function Library:CreateWindow(title)
 		end
 	end))
 
+	registerConnection(iconShell.InputBegan:Connect(function(input)
+		if destroyed then return end
+
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStartMouse = UserInputService:GetMouseLocation()
+			dragStartPos = target
+		end
+	end))
+	
 	registerConnection(dragArea.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = false
