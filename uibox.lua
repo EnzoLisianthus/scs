@@ -992,7 +992,12 @@ function Library:CreateWindow(title)
 
 			iconShell.Visible = true
 
-			iconShell.Position = holder.Position
+			iconShell.Position = UDim2.new(
+			holder.Position.X.Scale,
+			holder.Position.X.Offset + holder.Size.X.Offset/2,
+			holder.Position.Y.Scale,
+			holder.Position.Y.Offset + holder.Size.Y.Offset/2
+			)
 
 			tween(iconShell, TweenInfo.new(0.25), {
 				Size = minimizedSize
