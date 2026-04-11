@@ -23,7 +23,7 @@ function Library:CreateWindow(title)
 	local screen = Instance.new("ScreenGui")
 	screen.Name = "LiquidGlassDynamic"
 	screen.IgnoreGuiInset = true
-	screen.Parent = game:GetService("CoreGui")
+	screen.Parent = player:WaitForChild("PlayerGui")
 
 	local root = Instance.new("Frame")
 	root.Size = UDim2.fromScale(1,1)
