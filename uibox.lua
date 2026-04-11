@@ -248,8 +248,8 @@ function Library:CreateWindow(title)
 	iconLabel.Name = "IconLabel"
 	iconLabel.Size = UDim2.fromScale(1, 1)
 	iconLabel.BackgroundTransparency = 1
-	iconLabel.Text = "♡"
-	iconLabel.Font = Enum.Font.GothamBold
+	iconLabel.Text = "사랑해"
+	iconLabel.Font = Enum.Font.Arial
 	iconLabel.TextScaled = true
 	iconLabel.TextColor3 = Color3.fromRGB(42, 42, 42)
 	iconLabel.TextTransparency = 1
