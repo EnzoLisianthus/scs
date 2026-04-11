@@ -1062,7 +1062,7 @@ function Library:CreateWindow(title)
 	end))
 
 	registerConnection(UserInputService.InputChanged:Connect(function(input)
-		if destroyed or minimized then
+		if destroyed then
 			return
 		end
 
