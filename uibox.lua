@@ -14,7 +14,7 @@ local player = Players.LocalPlayer
 -- =========================
 -- 생성
 -- =========================
-function Library:CreateWindow()
+function Library:CreateWindow(title)
 
 	if game:GetService("CoreGui"):FindFirstChild("LiquidGlassDynamic") then
 		game:GetService("CoreGui").LiquidGlassDynamic:Destroy()
@@ -113,7 +113,7 @@ function Library:CreateWindow()
 	local pages = {}
 
 	-- =========================
-	-- 탭 생성 함수
+	-- 탭 생성 함수 (원본 그대로)
 	-- =========================
 	function Library:AddTab(name)
 		local button = Instance.new("TextButton")
@@ -147,7 +147,6 @@ function Library:CreateWindow()
 
 		local tab = {}
 
-		-- 버튼
 		function tab:AddButton(text, callback)
 			local btn = Instance.new("TextButton")
 			btn.Size = UDim2.new(1,-10,0,32)
@@ -164,7 +163,6 @@ function Library:CreateWindow()
 			end)
 		end
 
-		-- 토글
 		function tab:AddToggle(text, callback)
 			local state = false
 
@@ -185,7 +183,6 @@ function Library:CreateWindow()
 			end)
 		end
 
-		-- 입력박스
 		function tab:AddInput(text, callback)
 			local box = Instance.new("TextBox")
 			box.Size = UDim2.new(1,-10,0,32)
@@ -206,7 +203,16 @@ function Library:CreateWindow()
 	end
 
 	-- =========================
-	-- 드래그
+	-- 🔥 추가된 부분 (핵심)
+	-- =========================
+	local Window = {}
+
+	function Window:CreateTab(name)
+		return Library:AddTab(name)
+	end
+
+	-- =========================
+	-- 드래그 + 림 (원본 그대로)
 	-- =========================
 	local drag = Instance.new("TextButton")
 	drag.Size = UDim2.fromScale(1,1)
@@ -242,9 +248,6 @@ function Library:CreateWindow()
 		end
 	end)
 
-	-- =========================
-	-- 림 스무딩
-	-- =========================
 	local smoothOffset = 0
 
 	RunService.RenderStepped:Connect(function(dt)
@@ -276,7 +279,7 @@ function Library:CreateWindow()
 		edgeGrad.Offset = Vector2.new(smoothOffset, 0)
 	end)
 
-	return Library
+	return Window
 end
 
 return function()
