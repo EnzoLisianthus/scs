@@ -1090,7 +1090,12 @@ function Library:CreateWindow(title)
 
 	registerConnection(RunService.RenderStepped:Connect(function(dt)
 		if minimized then
-			iconShell.Position = holder.Position
+			iconShell.Position = UDim2.new(
+			holder.Position.X.Scale,
+			holder.Position.X.Offset + holder.Size.X.Offset/2,
+			holder.Position.Y.Scale,
+			holder.Position.Y.Offset + holder.Size.Y.Offset/2
+			)
 		end
 		if destroyed then
 			return
@@ -1099,9 +1104,9 @@ function Library:CreateWindow(title)
 		local follow = 1 - math.exp(-dt * 12)
 		current = current:Lerp(target, follow)
 
-		if not minimized then
-			holder.Position = UDim2.new(0.5, current.X, 0.5, current.Y)
-		end
+		
+		holder.Position = UDim2.new(0.5, current.X, 0.5, current.Y)
+		
 
 		local mouse = UserInputService:GetMouseLocation()
 
